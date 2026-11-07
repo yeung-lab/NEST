@@ -1,0 +1,241 @@
+# Per-model video/vision parameters for FPS computation and server startup.
+# Values sourced from each model's HuggingFace config.json.
+# This avoids calling AutoConfig.from_pretrained() at runtime.
+
+models:
+  # --- Qwen 2.5 VL family (patch_size=14, spatial_merge_size=2) ---
+  "Qwen/Qwen2.5-VL-3B-Instruct":
+    max_position_embeddings: 128000
+    patch_size: 14
+    spatial_merge_size: 2
+    architecture_type: standard
+    use_max_pixels: true  # Qwen smart_resize supports max_pixels cap
+
+  "Qwen/Qwen2.5-VL-7B-Instruct":
+    max_position_embeddings: 128000
+    patch_size: 14
+    spatial_merge_size: 2
+    architecture_type: standard
+    use_max_pixels: true
+
+  # --- Qwen 3 VL family (patch_size=16, spatial_merge_size=2) ---
+  "Qwen/Qwen3-VL-4B-Instruct":
+    max_position_embeddings: 262144
+    patch_size: 16
+    spatial_merge_size: 2
+    architecture_type: standard
+    use_max_pixels: true
+
+  "Qwen/Qwen3-VL-8B-Instruct":
+    max_position_embeddings: 262144
+    patch_size: 16
+    spatial_merge_size: 2
+    architecture_type: standard
+    use_max_pixels: true
+
+  "Qwen/Qwen3-VL-32B-Instruct":
+    max_position_embeddings: 262144
+    patch_size: 16
+    spatial_merge_size: 2
+    architecture_type: standard
+    use_max_pixels: true
+
+  "Qwen/Qwen3-VL-32B-Thinking":
+    max_position_embeddings: 262144
+    patch_size: 16
+    spatial_merge_size: 2
+    architecture_type: standard
+    use_max_pixels: true
+    reasoning_parser: qwen3
+
+  # --- Qwen 3.5 family (unified VL, patch_size=16, spatial_merge_size=2) ---
+  "Qwen/Qwen3.5-4B":
+    max_position_embeddings: 262144
+    patch_size: 16
+    spatial_merge_size: 2
+    architecture_type: standard
+    use_max_pixels: true  # Qwen2VL-based processor
+    disable_thinking: true  # Thinking exhausts token budget; disable to get direct answers
+
+  "Qwen/Qwen3.5-9B":
+    max_position_embeddings: 262144
+    patch_size: 16
+    spatial_merge_size: 2
+    architecture_type: standard
+    use_max_pixels: true
+    disable_thinking: true
+
+  "Qwen/Qwen3.5-27B":
+    max_position_embeddings: 262144
+    patch_size: 16
+    spatial_merge_size: 2
+    architecture_type: standard
+    use_max_pixels: true
+    disable_thinking: true
+
+  # --- InternVL (patch_size=14, downsample_ratio=0.5 ≈ merge_size=2) ---
+  "OpenGVLab/InternVL3_5-8B":
+    max_position_embeddings: 40960
+    patch_size: 14
+    spatial_merge_size: 2  # downsample_ratio=0.5 equivalent
+    architecture_type: standard
+    max_video_resolution: 448  # InternVL3 max spatial dim is 448, not 512
+
+  # --- LLaVA OneVision (SigLIP, patch_size=14, no spatial merge) ---
+  "llava-hf/llava-onevision-qwen2-7b-ov-hf":
+    max_position_embeddings: 32768
+    patch_size: 14
+    spatial_merge_size: 1
+    architecture_type: standard
+
+  # --- MiniCPM-V (3D resampler, query_num=64) ---
+  "openbmb/MiniCPM-V-4_5":
+    max_position_embeddings: 40960
+    patch_size: 14
+    spatial_merge_size: 1
+    architecture_type: resampler
+    resampler_output_tokens: 64  # query_num from config
+
+  # --- Molmo2 (pooling adapter, patch_size=14) ---
+  # Molmo2 forces --disable_chunked_mm_input, so max_num_batched_tokens
+  # must be >= max_tokens_per_mm_item (5312).
+  "allenai/Molmo2-8B":
+    max_position_embeddings: 36864
+    patch_size: 14
+    spatial_merge_size: 1
+    architecture_type: standard
+    max_num_batched_tokens: 8192
+    no_system_prompt: true  # Chat template requires strict user/assistant alternation
+
+  # --- Keye-VL 1.5 (Qwen2-VL style, patch_size=14, spatial_merge_size=2) ---
+  "Kwai-Keye/Keye-VL-1_5-8B":
+    max_position_embeddings: 131072
+    patch_size: 14
+    spatial_merge_size: 2
+    architecture_type: standard
+    use_max_pixels: true  # Qwen2-VL based
+
+  # --- GLM-4.1V-Thinking (Qwen2-VL style, patch_size=14, spatial_merge_size=2) ---
+  "zai-org/GLM-4.1V-9B-Thinking":
+    max_position_embeddings: 65536
+    patch_size: 14
+    spatial_merge_size: 2
+    architecture_type: standard
+    use_max_pixels: true  # Qwen2-VL based
+    reasoning_parser: deepseek_r1
+    max_tokens: 4096
+    thinking_model: true
+
+  # --- InternVL 3.5-38B (same arch as 8B, needs 80G GPU) ---
+  "OpenGVLab/InternVL3_5-38B":
+    max_position_embeddings: 40960
+    patch_size: 14
+    spatial_merge_size: 2  # downsample_ratio=0.5 equivalent
+    architecture_type: standard
+    max_video_resolution: 448  # InternVL3 max spatial dim is 448
+
+  # --- InternVL 3.5-4B (same arch as 8B) ---
+  "OpenGVLab/InternVL3_5-4B":
+    max_position_embeddings: 40960
+    patch_size: 14
+    spatial_merge_size: 2  # downsample_ratio=0.5 equivalent
+    architecture_type: standard
+    max_video_resolution: 448  # InternVL3 max spatial dim is 448
+
+  # --- LLaVA-NeXT-Video (Llama-based, fixed 336px, no spatial merge) ---
+  # vLLM's LlavaNextVideoForConditionalGeneration only supports video modality.
+  # Group A (image) questions are skipped for this model.
+  "llava-hf/LLaVA-NeXT-Video-7B-hf":
+    max_position_embeddings: 4096  # Llama base; vLLM extends to ~10240 via RoPE
+    patch_size: 14
+    spatial_merge_size: 1
+    architecture_type: standard
+    max_video_resolution: 336  # native image_size=336
+    max_num_batched_tokens: 4608  # encoder cache needs 8 default frames × 576 tok/frame
+    video_only: true  # vLLM rejects images; only video modality is supported
+
+  # --- openPangu-VL (Qwen2-VL style, patch_size=14, spatial_merge_size=2) ---
+  "FreedomIntelligence/openPangu-VL-7B":
+    max_position_embeddings: 131072
+    patch_size: 14
+    spatial_merge_size: 2
+    architecture_type: standard
+    use_max_pixels: true  # Qwen2-VL based
+
+  # --- Intern-S1-mini (InternVL style, patch_size=14, downsample_ratio=0.5) ---
+  "internlm/Intern-S1-mini":
+    max_position_embeddings: 65536
+    patch_size: 14
+    spatial_merge_size: 2  # downsample_ratio=0.5 equivalent
+    architecture_type: standard
+    max_video_resolution: 448  # InternVL style
+
+  # --- Tarsier2 (Qwen2-VL based, patch_size=14, spatial_merge_size=2) ---
+  "omni-research/Tarsier2-7b-0115":
+    max_position_embeddings: 32768
+    patch_size: 14
+    spatial_merge_size: 2
+    architecture_type: standard
+    use_max_pixels: true  # Qwen2-VL based
+
+  # --- SmolVLM2 (perceiver resampler, 64 latents, patch_size=16) ---
+  "HuggingFaceTB/SmolVLM2-256M-Video-Instruct":
+    max_position_embeddings: 8192
+    patch_size: 16
+    spatial_merge_size: 1
+    architecture_type: resampler
+    resampler_output_tokens: 64  # resampler_n_latents from config
+
+  "HuggingFaceTB/SmolVLM2-500M-Video-Instruct":
+    max_position_embeddings: 8192
+    patch_size: 16
+    spatial_merge_size: 1
+    architecture_type: resampler
+    resampler_output_tokens: 64  # resampler_n_latents from config
+
+  # --- Gemma 4 (multimodal; used here as a TEXT-only meta-judge) ---
+  # Native context is 131k; cap via --max-model-len at launch.
+  # disable_thinking forces direct JSON output (no <think> blocks)
+  # for the meta-judge's structured response.
+  # max_num_batched_tokens >= max_tokens_per_mm_item (2496 for 31B);
+  # 8192 gives headroom for any future mm input.
+  "google/gemma-4-E2B-it":
+    max_position_embeddings: 131072
+    patch_size: 14
+    spatial_merge_size: 2
+    architecture_type: standard
+    disable_thinking: true
+    max_num_batched_tokens: 8192
+
+  "google/gemma-4-E4B-it":
+    max_position_embeddings: 131072
+    patch_size: 14
+    spatial_merge_size: 2
+    architecture_type: standard
+    disable_thinking: true
+    max_num_batched_tokens: 8192
+
+  "google/gemma-4-31B-it":
+    max_position_embeddings: 131072
+    patch_size: 14
+    spatial_merge_size: 2
+    architecture_type: standard
+    disable_thinking: true
+    max_num_batched_tokens: 8192
+
+  "google/gemma-4-26B-A4B-it":
+    max_position_embeddings: 131072
+    patch_size: 14
+    spatial_merge_size: 2
+    architecture_type: standard
+    disable_thinking: true
+    max_num_batched_tokens: 8192
+
+# Defaults for models not listed above
+defaults:
+  patch_size: 14
+  spatial_merge_size: 2
+  architecture_type: standard
+  resampler_output_tokens: 96
+  max_video_resolution: 512  # max spatial side for --limit-mm-per-prompt and max_pixels
+  use_max_pixels: false       # only true for Qwen-VL based models (smart_resize)
